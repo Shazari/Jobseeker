@@ -1,0 +1,8 @@
+# Remove unused usings on save
+dotnet_remove_unused_usings = true
+
+# Prefer file-scoped namespaces (namespace X.Y;)
+csharp_style_namespace_declarations = file_scoped:suggestion
+
+# Format code on save
+dotnet_format_on_save = true
