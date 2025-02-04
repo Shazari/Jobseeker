@@ -5,5 +5,5 @@ namespace Jobseeker.Domain.Interfaces;
 
 public interface IJobPostRepository : IRepository<JobPost>
 {
-    Task<IEnumerable<JobPost>> GetByCompanyAsync(string companyName);
+    Task<IList<JobPost>?> GetByCompanyAsync(string companyName);
 }
