@@ -13,7 +13,7 @@ namespace Jobseeker.Infrastructure;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
         services.AddScoped<IUserAuthService, FirebaseAuthService>();
         services.AddScoped<IFileStorageService, FirebaseStorageService>();
