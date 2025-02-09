@@ -5,5 +5,4 @@ namespace Jobseeker.Domain.Interfaces;
 
 public interface IJobApplicationRepository : IRepository<JobApplication>
 {
-    Task<IEnumerable<JobApplication>> GetByUserIdAsync(Guid userId);
 }

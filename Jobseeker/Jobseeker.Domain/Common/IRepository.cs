@@ -2,9 +2,9 @@
 
 public interface IRepository<T> where T : BaseEntity
 {
-    Task<T> GetByIdAsync(Guid id);
-    Task<IEnumerable<T>> GetAllAsync();
+    Task<T?> GetByIdAsync(Guid id);
+    Task<IList<T>> GetAllAsync();
     Task AddAsync(T entity);
     Task UpdateAsync(T entity);
-    Task DeleteAsync(Guid id);
+    Task DeleteAsync(T entity);
 }

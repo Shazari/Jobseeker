@@ -5,5 +5,5 @@ namespace Jobseeker.Domain.Interfaces;
 
 public interface IDocumentRepository : IRepository<JobSeekerDocument>
 {
-    Task<IEnumerable<JobSeekerDocument>> GetByUserIdAsync(Guid userId);
+    Task<IList<JobSeekerDocument>?> GetByUserIdAsync(Guid userId);
 }
