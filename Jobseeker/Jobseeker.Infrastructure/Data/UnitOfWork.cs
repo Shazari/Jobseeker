@@ -1,59 +1,18 @@
 ﻿using Jobseeker.Domain.Common;
 using Jobseeker.Domain.Interfaces;
 using Jobseeker.Infrastructure.Data.Repositories;
-using Jobseeker.Infrastructure.Tool;
-using Jobseeker.Infrastructure.Tool.Enum;
-using Microsoft.EntityFrameworkCore;
 
 namespace Jobseeker.Infrastructure.Data;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private ApplicationDbContext _databaseContext;
-
-    protected DbOptions Options { get; set; }
+    private readonly ApplicationDbContext _databaseContext;
 
     public bool IsDisposed { get; protected set; }
 
-    public UnitOfWork(DbOptions dbOptions)
+    public UnitOfWork(ApplicationDbContext context)
     {
-        Options = dbOptions;
-    }
-
-    /// <summary>
-    /// Lazy Loading = Lazy Initialization
-    /// </summary>
-    internal ApplicationDbContext DatabaseContext
-    {
-        get
-        {
-            if (_databaseContext == null)
-            {
-                var optionsBuilder =
-                    new DbContextOptionsBuilder<ApplicationDbContext>();
-
-                switch (Options.Provider)
-                {
-                    case Provider.PostgreSQL:
-                        {
-                            optionsBuilder.UseNpgsql
-                                (connectionString: Options.ConnectionString);
-
-                            break;
-                        }
-
-                    default:
-                        {
-                            break;
-                        }
-                }
-
-                _databaseContext =
-                    new ApplicationDbContext(options: optionsBuilder.Options);
-            }
-
-            return _databaseContext;
-        }
+        _databaseContext = context;
     }
 
     public async Task SaveAsync() => await _databaseContext.SaveChangesAsync();

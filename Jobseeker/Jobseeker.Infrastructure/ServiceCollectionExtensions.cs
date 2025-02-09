@@ -4,35 +4,21 @@ using Jobseeker.Domain.Services;
 using Microsoft.Extensions.Configuration;
 using Jobseeker.Domain.Common;
 using Jobseeker.Infrastructure.Data;
-using Jobseeker.Infrastructure.Tool;
-using Jobseeker.Infrastructure.Tool.Enum;
-using System.Runtime.CompilerServices;
-using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace Jobseeker.Infrastructure;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IUserAuthService, FirebaseAuthService>();
         services.AddScoped<IFileStorageService, FirebaseStorageService>();
-        services.AddTransient<IUnitOfWork, UnitOfWork>(sp =>
+        services.AddDbContext<ApplicationDbContext>(options =>
         {
-            var configuration = sp.GetService<IConfiguration>();
-            DbOptions options =
-                new DbOptions
-                {
-                    Provider =
-                    (Provider)
-                        Convert.ToInt32(configuration?.GetSection(key: "databaseProvider").Value),
-
-                    ConnectionString =
-                        configuration?.GetSection(key: "ConnectionStrings").GetSection(key: "DbConnectionString").Value,
-                };
-
-            return new UnitOfWork(dbOptions: options);
+            options.UseNpgsql(configuration.GetConnectionString("DbConnectionString"));
         });
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
