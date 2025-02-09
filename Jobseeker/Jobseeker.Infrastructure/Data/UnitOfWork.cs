@@ -17,7 +17,7 @@ public class UnitOfWork : IUnitOfWork
 
     public async Task SaveAsync() => await _databaseContext.SaveChangesAsync();
 
-    private IUserRepository _userRepository;
+    private IUserRepository? _userRepository;
 
     public IUserRepository UserRepository
     {
@@ -33,7 +33,7 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
-    private IJobPostRepository _jobPostRepository;
+    private IJobPostRepository? _jobPostRepository;
 
     public IJobPostRepository JobPostRepository
     {
@@ -49,7 +49,7 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
-    private IJobApplicationRepository _jobApplicationRepository;
+    private IJobApplicationRepository? _jobApplicationRepository;
 
     public IJobApplicationRepository JobApplicationRepository
     {
@@ -65,7 +65,7 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
-    private IDocumentRepository _documentRepository;
+    private IDocumentRepository? _documentRepository;
 
     public IDocumentRepository DocumentRepository
     {
