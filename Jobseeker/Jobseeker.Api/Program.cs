@@ -1,5 +1,6 @@
 using Jobseeker.Infrastructure;
 using Jobseeker.Application;
+using Jobseeker.Api.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,13 @@ builder.Services.AddApplication();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+app.MapUserEndpoints();
+app.MapJobPostEndpoints();
+app.MapJobApplicationEndpoints();
+app.MapContactHistoryEndpoints();
+app.MapJobSeekerDocumentEndpoints();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

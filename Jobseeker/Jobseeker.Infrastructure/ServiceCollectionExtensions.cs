@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Jobseeker.Domain.Common;
 using Jobseeker.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Jobseeker.Infrastructure.Data.Repositories;
 
 namespace Jobseeker.Infrastructure;
 
@@ -18,7 +19,9 @@ public static class ServiceCollectionExtensions
         {
             options.UseNpgsql(configuration.GetConnectionString("DbConnectionString"));
         });
+        
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         return services;
     }

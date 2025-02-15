@@ -5,4 +5,5 @@ namespace Jobseeker.Application.Services.Interfaces;
 
 public interface IJobSeekerDocumentService : IBaseService<JobSeekerDocumentDto, CreateJobSeekerDocumentRequest, UpdateJobSeekerDocumentRequest>
 {
+    Task<IList<JobSeekerDocumentDto>> GetByJobSeekerIdAsync(Guid jobSeekerId)
 }

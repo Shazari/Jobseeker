@@ -10,8 +10,13 @@ public class JobSeekerDocumentService
     : BaseService<JobSeekerDocument, JobSeekerDocumentDto, CreateJobSeekerDocumentRequest, UpdateJobSeekerDocumentRequest>,
       IJobSeekerDocumentService
 {
+    private readonly IRepository<JobSeekerDocument> repository;
+
     public JobSeekerDocumentService(IRepository<JobSeekerDocument> repository, IUnitOfWork unitOfWork)
-        : base(repository, unitOfWork) { }
+        : base(repository, unitOfWork) 
+    {
+        this.repository = repository;
+    }
 
     protected override JobSeekerDocumentDto MapToDto(JobSeekerDocument entity)
         => new(entity.Id, entity.JobSeekerId, entity.DocumentUrl, entity.Type);
@@ -32,4 +37,11 @@ public class JobSeekerDocumentService
 
     protected override Guid GetEntityIdFromUpdateDto(UpdateJobSeekerDocumentRequest updateDto)
         => updateDto.Id;
+
+    public async Task<IList<JobSeekerDocumentDto>> GetByJobSeekerIdAsync(Guid jobSeekerId)
+    {
+        var documents = await repository.GetAllAsync();
+        var filtered = documents.Where(d => d.JobSeekerId == jobSeekerId).ToList();
+        return filtered.Select(MapToDto).ToList();
+    }
 }

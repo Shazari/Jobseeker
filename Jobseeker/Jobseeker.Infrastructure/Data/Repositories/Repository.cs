@@ -9,7 +9,7 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
 
     internal DbSet<T> DbSet { get; }
 
-    internal Repository(ApplicationDbContext databaseContext) : base()
+    public Repository(ApplicationDbContext databaseContext) : base()
     {
         DatabaseContext =
             databaseContext ?? throw new ArgumentNullException(paramName: nameof(databaseContext));
