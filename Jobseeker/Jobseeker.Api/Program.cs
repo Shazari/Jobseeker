@@ -15,6 +15,11 @@ builder.Services.AddApplication();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+});
+
 var app = builder.Build();
 
 await DataSeeder.SeedRolesAndAdminUserAsync(app.Services);
@@ -30,6 +35,8 @@ app.UseHttpsRedirection();
 app.UseMiddleware<FirebaseRoleMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseAntiforgery();
 
 // Register endpoints
 app.MapUserEndpoints();
