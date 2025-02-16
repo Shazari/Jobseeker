@@ -2,6 +2,7 @@
 using Jobseeker.Domain.Entities;
 using Jobseeker.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace Jobseeker.Api.Endpoints;
 
@@ -14,6 +15,8 @@ public static class AuthEndpoints
         // Register User
         authGroup.MapPost("/register", async ([FromBody] RegisterUserRequest request, IUserAuthService authService) =>
         {
+            Log.Information("Registering new user: {Email}, Roles: {Roles}", request.Email, string.Join(", ", request.Roles));
+
             var user = new User
             {
                 FullName = request.FullName,
@@ -23,28 +26,70 @@ public static class AuthEndpoints
             };
 
             var success = await authService.RegisterUserAsync(user, request.Password, request.Roles);
-            return success ? Results.Created($"/auth/register/{user.Email}", "User registered successfully") : Results.BadRequest("Failed to register user");
+            if (success)
+            {
+                Log.Information("User {Email} registered successfully", user.Email);
+                return Results.Created($"/auth/register/{user.Email}", "User registered successfully");
+            }
+            else
+            {
+                Log.Warning("Failed to register user: {Email}", user.Email);
+                return Results.BadRequest("Failed to register user");
+            }
         });
 
         // Login User
         authGroup.MapPost("/login", async ([FromBody] LoginRequest request, IUserAuthService authService) =>
         {
+            Log.Information("Login attempt for user: {Email}", request.Email);
+
             var token = await authService.AuthenticateUserAsync(request.Email, request.Password);
-            return token != null ? Results.Ok(new { Token = token }) : Results.Unauthorized();
+            if (token != null)
+            {
+                Log.Information("User {Email} logged in successfully", request.Email);
+                return Results.Ok(new { Token = token });
+            }
+            else
+            {
+                Log.Warning("Unauthorized login attempt for user: {Email}", request.Email);
+                return Results.Unauthorized();
+            }
         });
 
         // Get User Roles
         authGroup.MapGet("/roles", async ([FromQuery] string email, IUserAuthService authService) =>
         {
+            Log.Information("Fetching roles for user: {Email}", email);
+
             var roles = await authService.GetUserRolesAsync(email);
-            return roles.Any() ? Results.Ok(roles) : Results.NotFound("No roles found");
+            if (roles.Any())
+            {
+                Log.Information("Roles retrieved for user: {Email}. Roles: {Roles}", email, string.Join(", ", roles));
+                return Results.Ok(roles);
+            }
+            else
+            {
+                Log.Warning("No roles found for user: {Email}", email);
+                return Results.NotFound("No roles found");
+            }
         });
 
         // Update User Roles
         authGroup.MapPut("/roles/update", async ([FromBody] UpdateUserRolesRequest request, IUserAuthService authService) =>
         {
+            Log.Information("Updating roles for user: {Email}. New Roles: {Roles}", request.Email, string.Join(", ", request.Roles));
+
             var success = await authService.UpdateUserRolesAsync(request.Email, request.Roles);
-            return success ? Results.Ok("User roles updated successfully") : Results.BadRequest("Failed to update roles");
+            if (success)
+            {
+                Log.Information("User roles updated successfully for user: {Email}", request.Email);
+                return Results.Ok("User roles updated successfully");
+            }
+            else
+            {
+                Log.Warning("Failed to update roles for user: {Email}", request.Email);
+                return Results.BadRequest("Failed to update roles");
+            }
         });
     }
 }

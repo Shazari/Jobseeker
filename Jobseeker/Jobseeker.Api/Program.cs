@@ -3,6 +3,7 @@ using Jobseeker.Application;
 using Jobseeker.Api.Endpoints;
 using Jobseeker.Api.Middlewares;
 using Jobseeker.Infrastructure.Data;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,12 @@ builder.Services.AddAntiforgery(options =>
     options.HeaderName = "X-CSRF-TOKEN";
 });
 
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
 var app = builder.Build();
 
 await DataSeeder.SeedRolesAndAdminUserAsync(app.Services);
@@ -30,7 +37,16 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
 app.UseHttpsRedirection();
+
+app.Use(async (context, next) =>
+{
+    Log.Information("Request: {Method} {Path}", context.Request.Method, context.Request.Path);
+    await next();
+    Log.Information("Response {StatusCode}", context.Response.StatusCode);
+});
 
 app.UseMiddleware<FirebaseRoleMiddleware>();
 app.UseAuthentication();

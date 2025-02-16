@@ -3,6 +3,7 @@ using Jobseeker.Application.Common;
 using Jobseeker.Application.DTOs.JobSeekerDocument;
 using Jobseeker.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace Jobseeker.Api.Endpoints;
 
@@ -15,22 +16,55 @@ public static class JobSeekerDocumentEndpoints
         // ➤ Get All Documents
         documents.MapGet("/", async (IJobSeekerDocumentService service) =>
         {
+            Log.Information("Fetching all documents");
+
             var docs = await service.GetAllAsync();
-            return docs.Any() ? Results.Ok(docs) : Results.NotFound("No documents found.");
+            if (docs.Any())
+            {
+                Log.Information("Retrieved {Count} documents", docs.Count);
+                return Results.Ok(docs);
+            }
+            else
+            {
+                Log.Warning("No documents found");
+                return Results.NotFound("No documents found.");
+            }
         });
 
         // ➤ Get Document By ID
         documents.MapGet("/{id:guid}", async (Guid id, IJobSeekerDocumentService service) =>
         {
+            Log.Information("Fetching document with ID: {Id}", id);
+
             var doc = await service.GetByIdAsync(id);
-            return doc is not null ? Results.Ok(doc) : Results.NotFound($"Document with ID {id} not found.");
+            if (doc is not null)
+            {
+                Log.Information("Document found with ID: {Id}", id);
+                return Results.Ok(doc);
+            }
+            else
+            {
+                Log.Warning("Document with ID: {Id} not found", id);
+                return Results.NotFound($"Document with ID {id} not found.");
+            }
         });
 
         // ➤ Get Documents By Job Seeker ID
         documents.MapGet("/by-jobseeker/{jobSeekerId:guid}", async (Guid jobSeekerId, IJobSeekerDocumentService service) =>
         {
+            Log.Information("Fetching documents for JobSeekerId: {JobSeekerId}", jobSeekerId);
+
             var docs = await service.GetByJobSeekerIdAsync(jobSeekerId);
-            return docs.Any() ? Results.Ok(docs) : Results.NotFound($"No documents found for job seeker ID {jobSeekerId}.");
+            if (docs.Any())
+            {
+                Log.Information("Found {Count} documents for JobSeekerId: {JobSeekerId}", docs.Count, jobSeekerId);
+                return Results.Ok(docs);
+            }
+            else
+            {
+                Log.Warning("No documents found for JobSeekerId: {JobSeekerId}", jobSeekerId);
+                return Results.NotFound($"No documents found for job seeker ID {jobSeekerId}.");
+            }
         });
 
         // ➤ Upload Document (with Firebase Storage)
@@ -40,33 +74,55 @@ public static class JobSeekerDocumentEndpoints
          string type,
          IJobSeekerDocumentService documentService) =>
         {
-                var email = user.FindFirst(ClaimTypes.Email)?.Value
-                            ?? user.FindFirst("email")?.Value;
+            var email = user.FindFirst(ClaimTypes.Email)?.Value
+                        ?? user.FindFirst("email")?.Value;
 
-                try
-                {
-                    // Map IFormFile to FileUpload abstraction.
-                    var fileUpload = new FileUpload(
-                        file.OpenReadStream(),
-                        file.FileName,
-                        file.ContentType,
-                        file.Length);
+            Log.Information("Uploading document for user: {Email} with type: {Type}", email, type);
 
-                    var document = await documentService.UploadDocumentAsync(fileUpload, type, email);
-                    return Results.Ok(new { FileUrl = document.DocumentUrl, DocumentId = document.Id });
-                }
-                catch (Exception ex)
-                {
-                    return Results.BadRequest(ex.Message);
-                }
+            try
+            {
+                // Map IFormFile to FileUpload abstraction.
+                var fileUpload = new FileUpload(
+                    file.OpenReadStream(),
+                    file.FileName,
+                    file.ContentType,
+                    file.Length);
+
+                var document = await documentService.UploadDocumentAsync(fileUpload, type, email);
+
+                Log.Information("Document uploaded successfully. URL: {Url}, ID: {DocumentId}", document.DocumentUrl, document.Id);
+
+                return Results.Ok(new { FileUrl = document.DocumentUrl, DocumentId = document.Id });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to upload document for user: {Email}", email);
+                return Results.BadRequest(ex.Message);
+            }
         }).DisableAntiforgery();
 
         // ➤ Update Document Info
         documents.MapPut("/{id:guid}", async (Guid id, UpdateJobSeekerDocumentRequest updateDto, IJobSeekerDocumentService service) =>
         {
-            if (id != updateDto.Id) return Results.BadRequest("Mismatched IDs.");
+            Log.Information("Updating document with ID: {Id}", id);
+
+            if (id != updateDto.Id)
+            {
+                Log.Warning("Mismatched IDs for document update. Route ID: {RouteId}, DTO ID: {DtoId}", id, updateDto.Id);
+                return Results.BadRequest("Mismatched IDs.");
+            }
+
             var updatedDoc = await service.UpdateAsync(updateDto);
-            return updatedDoc is not null ? Results.Ok(updatedDoc) : Results.NotFound($"Document with ID {id} not found.");
+            if (updatedDoc is not null)
+            {
+                Log.Information("Document with ID: {Id} updated successfully", id);
+                return Results.Ok(updatedDoc);
+            }
+            else
+            {
+                Log.Warning("Document with ID: {Id} not found during update", id);
+                return Results.NotFound($"Document with ID {id} not found.");
+            }
         });
 
         // ➤ Delete Document
@@ -75,10 +131,19 @@ public static class JobSeekerDocumentEndpoints
             var email = user.FindFirst(ClaimTypes.Email)?.Value
                 ?? user.FindFirst("email")?.Value;
 
+            Log.Information("Attempting to delete document with ID: {DocumentId} for user: {Email}", documentId, email);
+
             var success = await documentService.DeleteDocumentAsync(documentId, email!);
-            return success
-                ? Results.Ok("Document and file deleted successfully.")
-                : Results.BadRequest("Deletion failed. Either the document does not exist, it does not belong to you, or file deletion failed.");
+            if (success)
+            {
+                Log.Information("Document with ID: {DocumentId} deleted successfully for user: {Email}", documentId, email);
+                return Results.Ok("Document and file deleted successfully.");
+            }
+            else
+            {
+                Log.Warning("Failed to delete document with ID: {DocumentId} for user: {Email}", documentId, email);
+                return Results.BadRequest("Deletion failed. Either the document does not exist, it does not belong to you, or file deletion failed.");
+            }
         }).DisableAntiforgery();
     }
 }
