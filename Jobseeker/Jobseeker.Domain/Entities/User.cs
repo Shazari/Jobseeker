@@ -11,4 +11,5 @@ public class User : AuditableEntity
     public UserType Type { get; set; }
     public List<JobApplication> JobApplications { get; set; } = [];
     public List<JobSeekerDocument> Documents { get; set; } = [];
+    public List<Role> Roles { get; set; } = [];
 }

@@ -81,6 +81,22 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
+    private IRoleRepository? _roleRepository;
+
+    public IRoleRepository RoleRepository
+    {
+        get
+        {
+            if (_roleRepository == null)
+            {
+                _roleRepository =
+                    new RoleRepository(_databaseContext);
+            }
+
+            return _roleRepository;
+        }
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!IsDisposed)

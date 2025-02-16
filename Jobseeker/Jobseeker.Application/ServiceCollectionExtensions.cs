@@ -13,6 +13,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IJobPostService, JobPostService>();
         services.AddScoped<IContactHistoryService, ContactHistoryService>();
         services.AddScoped<IJobSeekerDocumentService, JobSeekerDocumentService>();
+        services.AddScoped<IRoleService, RoleService>();
 
         return services;
     }
