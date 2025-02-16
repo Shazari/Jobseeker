@@ -1,5 +1,4 @@
-﻿using Jobseeker.Domain.Common;
-using Jobseeker.Domain.Entities;
+﻿using Jobseeker.Domain.Entities;
 using Jobseeker.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 

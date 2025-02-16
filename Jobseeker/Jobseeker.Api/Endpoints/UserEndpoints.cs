@@ -9,18 +9,6 @@ public static class UserEndpoints
     {
         var users = app.MapGroup("/users");
 
-        //users.MapPost("/register", async (UserRegistrationDto userDto, IAuthService authService) =>
-        //{
-        //    var result = await authService.RegisterUserAsync(userDto.Email, userDto.Password);
-        //    return result is not null ? Results.Ok(result) : Results.BadRequest("Registration failed.");
-        //});
-
-        //users.MapPost("/login", async (UserLoginDto userDto, IAuthService authService) =>
-        //{
-        //    var token = await authService.LoginUserAsync(userDto.Email, userDto.Password);
-        //    return token is not null ? Results.Ok(new { Token = token }) : Results.Unauthorized();
-        //});
-
         users.MapGet("/{id:guid}", async (Guid id, IUserService userService) =>
         {
             var user = await userService.GetByIdAsync(id);

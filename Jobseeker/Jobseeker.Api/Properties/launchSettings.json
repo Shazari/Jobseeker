@@ -11,7 +11,8 @@
     "https": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "FIREBASE_CREDENTIALS": "C:\\Users\\rezas\\source\\repos\\Shazari\\Jobseeker\\Jobseeker\\Jobseeker.Infrastructure\\jobseeker-2b60d-firebase-adminsdk-fbsvc-3fd4e0d996.json"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7171;http://localhost:5267"

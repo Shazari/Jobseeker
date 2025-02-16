@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# FireBase Admin SDK
+jobseeker-2b60d-firebase-adminsdk-fbsvc-3fd4e0d996.json
+appsettings.Development.json
+
 # User-specific files
 *.rsuser
 *.suo
@@ -398,3 +402,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+/Jobseeker/Jobseeker.Api/appsettings.Development.json
