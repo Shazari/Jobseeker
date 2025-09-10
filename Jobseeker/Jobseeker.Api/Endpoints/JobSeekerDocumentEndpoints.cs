@@ -88,6 +88,9 @@ public static class JobSeekerDocumentEndpoints
                     file.ContentType,
                     file.Length);
 
+                if(string.IsNullOrEmpty(email))
+                    return Results.Unauthorized();
+
                 var document = await documentService.UploadDocumentAsync(fileUpload, type, email);
 
                 Log.Information("Document uploaded successfully. URL: {Url}, ID: {DocumentId}", document.DocumentUrl, document.Id);

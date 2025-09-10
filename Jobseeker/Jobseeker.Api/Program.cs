@@ -21,6 +21,9 @@ builder.Services.AddAntiforgery(options =>
     options.HeaderName = "X-CSRF-TOKEN";
 });
 
+builder.Services.AddCors();
+
+
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
@@ -39,6 +42,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
+app.UseCors(policy =>
+    policy.WithOrigins("http://localhost:3000")
+          .AllowAnyHeader()
+          .AllowAnyMethod()
+          .AllowCredentials()
+);
 app.UseHttpsRedirection();
 
 app.Use(async (context, next) =>

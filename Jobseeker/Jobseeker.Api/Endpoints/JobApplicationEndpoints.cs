@@ -1,5 +1,7 @@
 ﻿using Jobseeker.Application.DTOs.JobApplication;
 using Jobseeker.Application.Services.Interfaces;
+using Jobseeker.Domain.Enums;
+using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
 namespace Jobseeker.Api.Endpoints;
@@ -11,11 +13,15 @@ public static class JobApplicationEndpoints
         var applications = app.MapGroup("/applications");
 
         // ➤ Get All Job Applications
-        applications.MapGet("/", async (IJobApplicationService jobAppService) =>
+        applications.MapGet("/", async (IJobApplicationService jobAppService, [FromQuery] JobApplicationStatus? status) =>
         {
             Log.Information("Fetching all job applications");
 
             var apps = await jobAppService.GetAllAsync();
+
+            if (status.HasValue)
+                apps = apps.Where(a => a.Status == status.Value).ToList();
+
             if (apps.Any())
             {
                 Log.Information("Retrieved {Count} job applications", apps.Count);
@@ -24,7 +30,7 @@ public static class JobApplicationEndpoints
             else
             {
                 Log.Warning("No job applications found");
-                return Results.NotFound("No job applications found.");
+                return Results.Ok(apps);
             }
         });
 
